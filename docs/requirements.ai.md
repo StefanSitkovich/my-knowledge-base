@@ -136,7 +136,9 @@ tasks/
 | `/debrief`      | Interview the human on their notes via the user-level `grilling` skill; write `.debrief.ai.md` + `.summary.ai.md`, create `proposed` tasks, update context `.ai.md` files. |
 | `/kb-check`     | Report broken links and naming-convention violations (agent-judged, no script).                        |
 
-## 11. UI (v1 requirements — implementation out of scope for now)
+## 11. UI (v1)
+
+Implemented as a VS Code extension in `extension/` (see its README).
 
 Motivation: plain Markdown lacked **human interactivity**.
 

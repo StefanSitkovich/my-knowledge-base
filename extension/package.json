@@ -1,0 +1,193 @@
+{
+  "name": "kb-ui",
+  "displayName": "Knowledge Base",
+  "description": "Kanban board, project tree and a one-tab human/AI pair editor for my-knowledge-base projects.",
+  "publisher": "stefansitkovich",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "workspaceContains:.kb/project.yaml"
+  ],
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "kb.pair",
+        "displayName": "KB Pair (you | AI)",
+        "selector": [
+          {
+            "filenamePattern": "*.md"
+          }
+        ],
+        "priority": "option"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "kb",
+          "title": "Knowledge Base",
+          "icon": "media/kb.svg"
+        }
+      ]
+    },
+    "views": {
+      "kb": [
+        {
+          "id": "kb.tree",
+          "name": "Project",
+          "when": "kb.active"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "kb.openBoard",
+        "title": "Open Task Board",
+        "category": "KB",
+        "icon": "$(project)"
+      },
+      {
+        "command": "kb.refresh",
+        "title": "Refresh",
+        "category": "KB",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "kb.openEntry",
+        "title": "Open Side by Side",
+        "category": "KB"
+      },
+      {
+        "command": "kb.openMeeting",
+        "title": "Open Meeting",
+        "category": "KB"
+      },
+      {
+        "command": "kb.openYaml",
+        "title": "Open YAML",
+        "category": "KB",
+        "icon": "$(symbol-property)"
+      },
+      {
+        "command": "kb.openExternal",
+        "title": "Open in Default App",
+        "category": "KB"
+      },
+      {
+        "command": "kb.newTask",
+        "title": "New Task",
+        "category": "KB",
+        "icon": "$(add)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "kb.newTask",
+          "when": "view == kb.tree",
+          "group": "navigation@1"
+        },
+        {
+          "command": "kb.openBoard",
+          "when": "view == kb.tree",
+          "group": "navigation@2"
+        },
+        {
+          "command": "kb.refresh",
+          "when": "view == kb.tree",
+          "group": "navigation@3"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "kb.openYaml",
+          "when": "view == kb.tree && viewItem =~ /yaml/"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "kb.openMeeting",
+          "when": "false"
+        },
+        {
+          "command": "kb.openEntry",
+          "when": "false"
+        },
+        {
+          "command": "kb.openYaml",
+          "when": "false"
+        },
+        {
+          "command": "kb.openExternal",
+          "when": "false"
+        },
+        {
+          "command": "kb.openBoard",
+          "when": "kb.active"
+        },
+        {
+          "command": "kb.newTask",
+          "when": "kb.active"
+        },
+        {
+          "command": "kb.refresh",
+          "when": "kb.active"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Knowledge Base",
+      "properties": {
+        "kb.openOnStartup": {
+          "type": "string",
+          "enum": [
+            "board",
+            "sidebar",
+            "none"
+          ],
+          "enumDescriptions": [
+            "Show the Knowledge Base sidebar and open the task board",
+            "Show the Knowledge Base sidebar only",
+            "Do nothing on startup"
+          ],
+          "default": "board",
+          "description": "What opens automatically when a folder with .kb/project.yaml is opened."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p webview",
+    "test": "node --test test/kb.test.ts",
+    "package": "npm run build && vsce package --no-dependencies --skip-license --allow-missing-repository"
+  },
+  "dependencies": {
+    "yaml": "^2.8.0"
+  },
+  "devDependencies": {
+    "@codemirror/commands": "^6.11.1",
+    "@codemirror/lang-markdown": "^6.5.2",
+    "@codemirror/language": "^6.12.4",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.13",
+    "@lezer/highlight": "^1.2.3",
+    "@types/markdown-it": "^14.2.0",
+    "@types/node": "^22.0.0",
+    "@types/vscode": "~1.90.0",
+    "@vscode/vsce": "^3.0.0",
+    "codemirror": "^6.0.2",
+    "esbuild": "^0.25.0",
+    "markdown-it": "^15.0.2",
+    "typescript": "^5.9.0"
+  }
+}

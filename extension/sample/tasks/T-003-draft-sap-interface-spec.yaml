@@ -1,0 +1,5 @@
+id: T-003
+title: Draft SAP interface spec
+status: in-progress
+relations:
+  - { to: ../sources/docs/brd-v3/extracted.md#L3, type: "requirement" }

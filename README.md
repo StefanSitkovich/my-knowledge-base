@@ -11,6 +11,8 @@ Open Claude Code in this repo, then:
 
 In a project: `/ingest-doc`, `/meeting-prep`, `/debrief`, `/kb-check` (see its `AGENTS.md`).
 
+UI: the VS Code extension in [`extension/`](extension/README.md) adds a task board, a project tree and a human/AI side-by-side view.
+
 ## Requirements
 
 - Node (for the ownership hook)
@@ -25,5 +27,6 @@ template/         copied into each project
   .kb/            project marker (tool_version, created)
   .claude/        settings.json, hooks/guard-md.mjs, skills/
   context/ meetings/ sources/ tasks/
+extension/        VS Code extension (UI)
 docs/             requirements
 ```

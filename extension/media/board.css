@@ -1,0 +1,235 @@
+:root {
+  --gap: 12px;
+  --radius: 6px;
+  --column-bg: color-mix(in srgb, var(--vscode-editor-background) 92%, var(--vscode-foreground));
+  --card-bg: var(--vscode-editor-background);
+  --border: var(--vscode-panel-border, color-mix(in srgb, var(--vscode-foreground) 15%, transparent));
+  --muted: var(--vscode-descriptionForeground);
+  --accent: var(--vscode-focusBorder);
+  --proposed: var(--vscode-editorWarning-foreground, #cca700);
+  --done: var(--vscode-testing-iconPassed, #73c991);
+  --ai: var(--vscode-charts-purple, #b180d7);
+  --human: var(--vscode-charts-blue, #3794ff);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: var(--gap);
+  background: var(--vscode-editor-background);
+  color: var(--vscode-foreground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+}
+
+#board {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(220px, 1fr);
+  gap: var(--gap);
+  align-items: start;
+  overflow-x: auto;
+  min-height: calc(100vh - 2 * var(--gap));
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  background: var(--column-bg);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--border);
+  border-radius: var(--radius);
+  max-height: calc(100vh - 2 * var(--gap));
+}
+
+.column.status-proposed {
+  border-top-color: var(--proposed);
+}
+
+.column.status-in-progress {
+  border-top-color: var(--accent);
+}
+
+.column.status-done {
+  border-top-color: var(--done);
+}
+
+.column.status-unknown {
+  border-top-color: var(--vscode-errorForeground);
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 10px 6px 12px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.count {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+header .icon {
+  margin-left: auto;
+}
+
+.hint {
+  margin: 0 12px 6px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.cards {
+  list-style: none;
+  margin: 0;
+  padding: 4px 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 48px;
+  overflow-y: auto;
+  border-radius: 0 0 var(--radius) var(--radius);
+  transition: background 120ms;
+}
+
+.cards.over {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  outline: 1px dashed var(--accent);
+  outline-offset: -4px;
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.card:hover {
+  border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
+}
+
+.card:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.card.dragging {
+  opacity: 0.4;
+}
+
+.status-proposed .card {
+  border-style: dashed;
+}
+
+.status-done .card .title {
+  color: var(--muted);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.id {
+  font-family: var(--vscode-editor-font-family);
+  font-variant-numeric: tabular-nums;
+}
+
+.badge {
+  padding: 0 5px;
+  border-radius: 3px;
+  font-size: 10px;
+  line-height: 16px;
+  border: 1px solid currentColor;
+}
+
+.badge.human {
+  color: var(--human);
+}
+
+.badge.ai {
+  color: var(--ai);
+}
+
+.relations {
+  margin-left: auto;
+}
+
+.title {
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  border-radius: 3px;
+}
+
+.title[contenteditable="plaintext-only"] {
+  outline: 1px solid var(--accent);
+  padding: 0 2px;
+  cursor: text;
+}
+
+.error {
+  margin: 0;
+  color: var(--vscode-errorForeground);
+  font-size: 11px;
+}
+
+button {
+  font: inherit;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+button:hover {
+  color: var(--vscode-foreground);
+  background: var(--vscode-toolbar-hoverBackground);
+}
+
+button:focus-visible {
+  outline: 1px solid var(--accent);
+}
+
+button.icon {
+  width: 22px;
+  height: 22px;
+  font-size: 16px;
+  line-height: 1;
+}
+
+input.new {
+  width: 100%;
+  font: inherit;
+  color: var(--vscode-input-foreground);
+  background: var(--vscode-input-background);
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  padding: 4px 6px;
+}
+
+.card.editing {
+  cursor: default;
+  padding: 6px;
+}

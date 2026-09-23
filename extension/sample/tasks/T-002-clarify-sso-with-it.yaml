@@ -1,0 +1,7 @@
+# comment kept on status change
+id: T-002
+title: Clarify SSO with IT
+status: waiting
+relations:
+  - { to: ../context/people/customer/anna-meier.md, type: "owner on their side" }
+  - { to: ../meetings/2026-09-20-kickoff-it.summary.ai.md, type: "raised in" }

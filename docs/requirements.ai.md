@@ -1,6 +1,6 @@
 # Project Knowledge Management System — v1 Requirements
 
-Derived from `design.md` in a grilling session on 2026-09-23. AI-written; the human-owned source of intent is `design.md`.
+Derived from `requirements.md` in grilling sessions on 2026-09-23. AI-written; the human-owned source of intent is `requirements.md`.
 
 ## 1. Purpose
 
@@ -11,10 +11,11 @@ A personal knowledge system for a consultant on software implementation projects
 
 ## 2. Repositories
 
-- **This repo is the tool**: skills, hook, project template, later the UI.
-- **Each client project is its own git repo**, created later via `/new-project`.
+- **This repo is the tool**: `/new-project` and `/update-project` skills, the project `template/`, later the UI.
+- **Each client project is its own git repo**, created via `/new-project` run from this repo.
 - Project repos are **local only** (no remote). Originals (PDF, DOCX, …) **are committed**.
-- Distribution of the tool into project repos is an **open decision** (see §13). Whatever the mechanism, the tool must not affect repos that are not KB projects.
+- **Distribution: copy per project.** `/new-project` copies `template/` (including `.claude/` with skills, hook and settings) into the new repo, so the tool never affects other repos. `/update-project <path>` re-copies `template/.claude/**` only and never touches content or `settings.local.json`.
+- **KB-project marker:** `.kb/project.yaml` with `tool_version` (the tool repo commit it was created or updated from) and `created`.
 
 ## 3. Ownership rule (core invariant)
 
@@ -26,14 +27,14 @@ A personal knowledge system for a consultant on software implementation projects
 
 - Files with the same stem form a **pair/group**; any member may exist alone.
 - **No promote/accept mechanism.** Confirmation happens in conversation (the debrief). If the human wants content to be theirs, they write it into the `.md` themselves.
-- **Enforcement:** a Claude Code **PreToolUse hook** blocks `Write`/`Edit` on any `*.md` that is not `*.ai.md`, only inside KB project repos.
-  - Known gap: writes via shell commands (Bash) are not covered by the hook.
+- **Enforcement:** a Claude Code **PreToolUse hook** (`.claude/hooks/guard-md.mjs`, dependency-free Node) blocks `Write`/`Edit`/`MultiEdit`/`NotebookEdit` on any `*.md` that is not `*.ai.md`, only inside the project root. Creating new `.md` files is blocked too: the human creates every human-side file, including meeting notes.
+  - Known gap: writes via shell commands (Bash) are not covered by the hook. Tool-written files such as `extracted.md` are produced this way.
 - `AGENTS.md` is created from a template by `/new-project`; afterwards it is human-owned.
 
 ## 4. Conventions
 
 - **Markdown** for all prose. **No frontmatter for shared data** — shared metadata lives in `.yaml`. (`.ai.md` files may carry frontmatter, e.g. `index.ai.md`.)
-- **Links:** relative Markdown links, e.g. `[Anna](../context/people/customer/anna-meier.md)`.
+- **Links:** relative Markdown links, e.g. `[Anna](../context/people/customer/anna-meier.md)`. A link always targets a file that exists: when a pair has no `.md` side, link the `.ai.md`.
 - **No folder indexes.** Filenames must be descriptive enough to find things by name and grep. Exception: ingested docs have a section index (§7).
 - **Language:** per project, following the client. Recorded in `AGENTS.md`. Sources stay in their original language.
 - **`AGENTS.md` is a router**: ~5 lines on the project, folder map, ownership rule, where to look for what. Facts live in context docs, not here.
@@ -77,6 +78,7 @@ sources/docs/brd-v3/               # agent side, never viewed by humans
 
 - **No symlinks** (fragile on Windows + git).
 - **Extraction** to Markdown from PDF/DOCX/XLSX/PPTX by a **deterministic parser** into one `extracted.md`. It is tool-written, so it is a plain `.md`: the hook keeps the AI from altering the client's text.
+- **The parser is pluggable:** `/ingest-doc` delegates to the user-level `parse` skill, named in one line of its `SKILL.md`. That skill owns dependencies, flags, images and its coverage gate; the only contract is one Markdown file at `extracted.md`.
 - **Sectioning is semantic**, decided by the ingest agent per document (not purely by headings), and recorded only in `index.ai.md` as line ranges — the extracted text is never split or rewritten:
   ```
   - L120–245 · Interfaces to SAP · Outbound IDocs for orders, inbound confirmations.
@@ -110,7 +112,7 @@ tasks/
   T-050-clarify-sso-with-it.ai.md    # AI description
 ```
 
-- **ID + slug** in the filename; the slug is fixed at creation (not renamed when the title changes).
+- **ID + slug** in the filename (`T-001`, three digits, next = highest existing + 1); the slug is fixed at creation (not renamed when the title changes).
 - `.yaml` fields: `id`, `title`, `status`, `relations`.
 - **Relations** may target any file (task, person, system, meeting, doc section via line anchor), each with a **free-text type**:
   ```yaml
@@ -127,11 +129,12 @@ tasks/
 
 | Skill           | Does                                                                                                   |
 |-----------------|--------------------------------------------------------------------------------------------------------|
-| `/new-project`  | Scaffold a project repo from the template, `AGENTS.md` (incl. language), `git init`, KB-project marker. |
+| `/new-project`  | Scaffold a project repo from the template, `AGENTS.md` (incl. language), `git init`, KB-project marker, initial commit. Runs from the tool repo. |
+| `/update-project` | Re-copy `template/.claude/**` into an existing project and bump `tool_version`. Runs from the tool repo. |
 | `/ingest-doc`   | Original → `extracted.md` (parser) + `index.ai.md` (semantic sections by line range) + `summary.ai.md`; update affected context `.ai.md` files. |
 | `/meeting-prep` | Write `.prep.ai.md`: agenda and open questions drawn from tasks and context.                           |
-| `/debrief`      | Interview the human on their notes; write `.debrief.ai.md` + `.summary.ai.md`, create `proposed` tasks, update context `.ai.md` files. |
-| `/kb-check`     | Report broken links, AI edits to `.md` files, naming-convention violations.                            |
+| `/debrief`      | Interview the human on their notes via the user-level `grilling` skill; write `.debrief.ai.md` + `.summary.ai.md`, create `proposed` tasks, update context `.ai.md` files. |
+| `/kb-check`     | Report broken links and naming-convention violations (agent-judged, no script).                        |
 
 ## 11. UI (v1 requirements — implementation out of scope for now)
 
@@ -155,7 +158,9 @@ Motivation: plain Markdown lacked **human interactivity**.
 
 ## 13. Open decisions
 
-- **Distribution:** how skills, hook and template reach project repos (Claude Code plugin installed at user level vs. copied into each project's `.claude/`).
+None. Distribution was resolved as copy per project (§2).
+
+**Dependencies on user-level skills:** projects rely on `parse` (for `/ingest-doc`) and `grilling` (for `/debrief`) being installed at user level.
 
 ## 14. Later: topic map (concept)
 
